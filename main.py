@@ -15,17 +15,17 @@ def process_command(command):
         tts.speak('Goodbye!')
         exit()
     elif intent == 'weather':
-        weather.handle_command(command)
+        weather.handle_command()
     elif intent == 'time':
-        time.handle_command(command)
+        time.handle_command()
     elif intent == 'joke':
-        joke.handle_command(command)
+        joke.handle_command()
     elif intent == 'news':
-        news.handle_command(command)
+        news.handle_command()
     elif intent == 'wikipedia':
-        wikipedia.handle_command(command)
+        wikipedia.handle_command()
     elif intent == 'google':
-        web_search.handle_command(command)
+        web_search.handle_command()
     else:
         print('Sorry, I did not get that')
         tts.speak('Sorry, I did not get that')
