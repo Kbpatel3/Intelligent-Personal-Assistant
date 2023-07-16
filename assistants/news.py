@@ -36,6 +36,10 @@ def get_news(query):
             tts.speak('Moving on to the next article')
         elif intent == 'no':
             continue
+        elif intent == 'exit':
+            print('Exiting news assistant')
+            tts.speak('Exiting news assistant')
+            return
 
 
 def handle_command():
