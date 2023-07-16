@@ -36,7 +36,7 @@ def process_command(command):
 def main():
     while True:
         try:
-            await_text = srutils.recognize()
+            await_text = srutils.recognize(False)
             if nlp.extract_intent(await_text) == 'assistant':
                 print("Assistant activated")
                 tts.speak("Assistant activated")
