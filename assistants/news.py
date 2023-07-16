@@ -1,6 +1,8 @@
 from utils import text_to_speech as tts
 from newsapi import NewsApiClient as na
 from utils import config
+from utils import nlp
+from utils import speech_recognition as srutils
 
 newsapi = na(api_key=config.NEWS_API_KEY)
 
@@ -11,10 +13,14 @@ def get_news(query):
     else:
         headlines = newsapi.get_top_headlines(language='en', country='us', page_size=5, page=1)
 
-    print('Top headlines')
     print(f"Total results: {headlines['totalResults']}")
-    tts.speak('Top headlines')
+    if headlines['totalResults'] == 0:
+        print('No results found')
+        tts.speak('No results found')
+        return
 
+    print('The top headlines are: ')
+    tts.speak('The top headlines are: ')
     for article in headlines['articles']:
         print(article['title'])
         tts.speak(article['title'])
@@ -22,18 +28,13 @@ def get_news(query):
         print('Would you like to know more?')
         tts.speak('Would you like to know more?')
 
-        print('1. Yes')
-        tts.speak('1. Yes')
-
-        print('2. No')
-        tts.speak('2. No')
-
-        choice = input('Enter your choice: ')
+        intent = nlp.extract_intent(srutils.recognize())
         print()
-        if choice == '1':
+        if intent == 'yes':
             print(article['description'])
             tts.speak(article['description'])
-        elif choice == '2':
+            tts.speak('Moving on to the next article')
+        elif intent == 'no':
             continue
 
 
@@ -53,12 +54,18 @@ def handle_command():
     print('3. Exit')
     tts.speak('3. Exit')
 
-    choice = input('Enter your choice: ')
-    if choice == '1':
+    intent = nlp.extract_intent(srutils.recognize())
+
+    print(intent)
+    if intent == 'one' or intent == 'top headlines':
         get_news(None)
-    elif choice == '2':
-        query = input('Enter your query: ')
+    elif intent == 'two' or intent == 'search' or intent == 'wikipedia' or intent == 'google':
+        print("What would you like to know about?")
+        tts.speak("What would you like to know about?")
+
+        query = srutils.recognize()
+
         get_news(query)
-    elif choice == '3':
+    elif intent == 'three' or intent == 'exit':
         print('Exiting news assistant')
         tts.speak('Exiting news assistant')

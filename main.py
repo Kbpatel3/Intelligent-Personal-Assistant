@@ -11,6 +11,7 @@ def process_command(command):
     if intent == 'greeting':
         print('Hello, how can I help you?')
         tts.speak('Hello, how can I help you?')
+        process_command(srutils.recognize())
     elif intent == 'goodbye':
         print('Goodbye!')
         tts.speak('Goodbye!')
@@ -28,20 +29,24 @@ def process_command(command):
     elif intent == 'google':
         web_search.handle_command()
     else:
-        print('Sorry, I did not get that')
-        tts.speak('Sorry, I did not get that')
+        print('Intent not recognized')
+        tts.speak('Intent not recognized')
 
 
 def main():
     while True:
         try:
-            speech_text = srutils.recognize()
-            process_command(speech_text)
+            await_text = srutils.recognize()
+            if nlp.extract_intent(await_text) == 'assistant':
+                print("Assistant activated")
+                tts.speak("Assistant activated")
+                speech_text = srutils.recognize()
+                process_command(speech_text)
         except sr.UnknownValueError:
-            print('Sorry, I did not get that')
             continue
         except sr.RequestError as e:
             print(f'Sorry, my speech service is down {e}')
+            tts.speak('Sorry, my speech service is down')
             continue
         except sr.WaitTimeoutError:
             print("Timeout: No speech detected")
