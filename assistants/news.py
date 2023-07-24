@@ -9,7 +9,7 @@ newsapi = na(api_key=config.NEWS_API_KEY)
 
 def get_news(query):
     if query:
-        headlines = newsapi.get_top_headlines(q=query, language='en', country='us', page_size=5, page=1)
+        headlines = newsapi.get_everything(q=query, language='en', page_size=5, page=1)
     else:
         headlines = newsapi.get_top_headlines(language='en', country='us', page_size=5, page=1)
 
