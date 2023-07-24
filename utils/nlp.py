@@ -1,4 +1,7 @@
 import nltk
+import spacy
+import arrow
+
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -10,6 +13,11 @@ def extract_intent(command):
     # Remove stop words
     stop_words = nltk.corpus.stopwords.words('english')
     tokens = [token for token in tokens if token not in stop_words]
+
+    # SpaCy for NER (Named Entity Recognition)
+    nlp = spacy.load('en_core_web_sm')
+    doc = nlp(command)
+    entities = [(ent.text, ent.label_) for ent in doc.ents]
 
     intents = {
         'assistant': ['assistant'],
@@ -35,3 +43,28 @@ def extract_intent(command):
     for intent, keywords in intents.items():
         if any(keyword in tokens for keyword in keywords):
             return intent
+
+    # Check if the command contains any of the entities
+    for entity, label in entities:
+        if label == 'GPE' and 'time' in tokens:
+            return 'time in location'
+        elif label == 'TIME':
+            return 'current time'
+
+    # Date/Time parsing
+    if 'date' in tokens:
+        return 'current date'
+    elif 'day' in tokens and 'week' in tokens:
+        return 'current day of the week'
+    elif 'time zone' in command or 'time in' in command:
+        return 'time zone conversion'
+    elif 'event' in tokens and ('time' in tokens or 'start' in tokens or 'end' in tokens):
+        return 'time of event'
+    elif 'duration' in tokens or 'long' in tokens:
+        return 'time duration'
+    elif 'calculate' in tokens and 'time' in tokens:
+        return 'time calculation'
+    elif 'past' in tokens or 'future' in tokens:
+        return 'time in the past/future'
+    elif any(arrow.get(token, ['h:mm A', 'H:mm']).format('') == token for token in tokens):
+        return 'time format'
