@@ -44,12 +44,16 @@ def extract_intent(command):
         if any(keyword in tokens for keyword in keywords):
             return intent
 
+    # Dictionary for time parameters
+    parameters = {}
+
     # Check if the command contains any of the entities
     for entity, label in entities:
         if label == 'GPE' and 'time' in tokens:
-            return 'time in location'
+            parameters['location'] = entity
+            return 'time in location', parameters
         elif label == 'TIME':
-            return 'current time'
+            return 'current time', parameters
 
     # Date/Time parsing
     if 'date' in tokens:

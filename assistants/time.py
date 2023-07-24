@@ -1,17 +1,21 @@
 from utils import text_to_speech as tts, nlp, speech_recognition as srutils
 import arrow
 
+
 def get_current_time():
     current_time = arrow.now().format('hh:mm A')
     return f'The current time is {current_time}'
+
 
 def get_current_date():
     current_date = arrow.now().format('dddd, MMMM D, YYYY')
     return f'The current date is {current_date}'
 
+
 def get_day_of_week():
     day_of_week = arrow.now().format('dddd')
     return f'Today is {day_of_week}'
+
 
 def get_time_in_timezone(location):
     try:
@@ -20,9 +24,11 @@ def get_time_in_timezone(location):
     except arrow.parser.ParserError:
         return f'Location {location} not found'
 
+
 def calculate_time_in_future(hours, minutes):
     future_time = arrow.now().shift(hours=hours, minutes=minutes).format('hh:mm A')
     return f'The time in {hours} hours and {minutes} minutes will be {future_time}'
+
 
 def calculate_time_difference(time1, time2):
     try:
@@ -32,6 +38,7 @@ def calculate_time_difference(time1, time2):
         return f'The difference between {time1.format("hh:mm A")} and {time2.format("hh:mm A")} is {time_difference}'
     except arrow.parser.ParserError:
         return "Invalid time format"
+
 
 def handle_command():
     print('Time assistant')
@@ -85,5 +92,3 @@ def handle_command():
         else:
             print("Please provide two times")
             tts.speak("Please provide two times")
-
-
