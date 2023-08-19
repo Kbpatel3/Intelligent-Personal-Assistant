@@ -1,57 +1,61 @@
-import pyttsx3 as tts
-from assistants import weather, time, joke, news, wikipedia, web_search
-from utils import nlp
-from utils import speech_recognition as srutils
 import speech_recognition as sr
+import pyttsx3 as tts
+from neuralintents import GenericAssistant
+from playsound import playsound
+import sys
+from assistants import news
 
 
-def process_command(command):
-    intent = nlp.extract_intent(command)
+class Assistant:
+    def __init__(self):
+        self.recognizer = sr.Recognizer()
+        self.speaker = tts.init()
+        self.speaker.setProperty('rate', 150)
 
-    if intent == 'greeting':
-        print('Hello, how can I help you?')
-        tts.speak('Hello, how can I help you?')
-        process_command(srutils.recognize())
-    elif intent == 'goodbye':
-        print('Goodbye!')
-        tts.speak('Goodbye!')
-        exit()
-    elif intent == 'weather':
-        weather.handle_command()
-    elif intent == 'time':
-        time.handle_command()
-    elif intent == 'joke':
-        joke.handle_command()
-    elif intent == 'news':
-        news.handle_command()
-    elif intent == 'wikipedia':
-        wikipedia.handle_command()
-    elif intent == 'google':
-        web_search.handle_command()
-    else:
-        print('Intent not recognized')
-        tts.speak('Intent not recognized')
+        self.assistant = GenericAssistant('intents.json', intent_methods={
+            'news': self.news,
+        })
+        self.assistant.train_model()
 
+    def news(self):
+        self.speaker.say('Getting news')
+        self.speaker.runAndWait()
+        news.handle_command(self.speaker, self.recognizer)
 
-def main():
-    while True:
-        try:
-            await_text = srutils.recognize(False)
-            if nlp.extract_intent(await_text) == 'assistant':
-                print("Assistant activated")
-                tts.speak("Assistant activated")
-                speech_text = srutils.recognize()
-                process_command(speech_text)
-        except sr.UnknownValueError:
-            continue
-        except sr.RequestError as e:
-            print(f'Sorry, my speech service is down {e}')
-            tts.speak('Sorry, my speech service is down')
-            continue
-        except sr.WaitTimeoutError:
-            print("Timeout: No speech detected")
-            continue
+    def run_assistant(self):
+        while True:
+            try:
+                with sr.Microphone() as mic:
+                    self.recognizer.adjust_for_ambient_noise(mic, duration=0.2)
+                    print('Listening...')
+                    audio = self.recognizer.listen(mic)
+                    print("Processing...")
+                    text = self.recognizer.recognize_google(audio)
+                    text = text.lower()
+                    print(f'You said: {text}')
+
+                    if "hey assistant" in text:
+                        playsound('utils/sounds/assistant_activated.mp3', block=False)
+                        print('Listening...')
+                        audio = self.recognizer.listen(mic)
+                        print("Processing...")
+                        text = self.recognizer.recognize_google(audio)
+                        text = text.lower()
+                        if text == 'exit':
+                            print('Exiting assistant')
+                            self.speaker.say('Exiting assistant')
+                            self.speaker.runAndWait()
+                            self.speaker.stop()
+                            sys.exit()
+                        else:
+                            if text is not None:
+                                response = self.assistant.request(text)
+                                if response is not None:
+                                    self.speaker.say(response)
+                                    self.speaker.runAndWait()
+            except:
+                continue
 
 
 if __name__ == '__main__':
-    main()
+    Assistant()
